@@ -1,6 +1,7 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import { getUsersContributions } from "./github";
+import convertContributionsToNotes from "./notes";
 
 dotenv.config();
 
@@ -18,6 +19,18 @@ app.get("/contributions", async (req: Request, res: Response) => {
   try {
     const data = await getUsersContributions(githubPat, username + "");
     res.send(data);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+app.get("/notes", async (req: Request, res: Response) => {
+  const username = req.query.username;
+
+  try {
+    const data = await getUsersContributions(githubPat, username + "");
+    const notes = convertContributionsToNotes(data);
+    res.send({ notes });
   } catch (error) {
     res.status(500).send(error);
   }
