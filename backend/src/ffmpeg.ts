@@ -1,10 +1,12 @@
-import ffmpeg from "fluent-ffmpeg";
-const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
-const ffprobePath = require("@ffprobe-installer/ffprobe").path;
-import { Note } from "../types/notes";
-ffmpeg.setFfmpegPath(ffmpegPath);
-ffmpeg.setFfprobePath(ffprobePath);
 import path from "path";
+import ffmpeg from "fluent-ffmpeg";
+import ffmpegPath  from "@ffmpeg-installer/ffmpeg"
+import ffprobePath from "@ffprobe-installer/ffprobe"
+
+import { Note } from "../types/notes";
+
+ffmpeg.setFfmpegPath(ffmpegPath.path);
+ffmpeg.setFfprobePath(ffprobePath.path);
 
 const noteToPathMap: { [key: string]: string } = {
   A: path.resolve(__dirname, "./notes/A_note.wav"),
@@ -31,7 +33,11 @@ export function mergeNotes(
   ])
     .on("end", async function (output) {
       console.log(output, "files hav been merged and saved.");
-      callback();
+      callback(null);
+    })
+    .on("error", async function (err) {
+      console.log(err);
+      callback(err);
     })
     .saveToFile(path.resolve(__dirname, `./notes/${fileName}.wav`));
 }

@@ -38,14 +38,14 @@ app.get("/notes", async (req: Request, res: Response) => {
 });
 
 app.get("/combine", async (req: Request, res: Response) => {
-  try {
-    mergeNotes(["A", "G", "C", "B"], req.query.fileName + "", () =>
-      res.send("DONE")
-    );
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
-  }
+  mergeNotes(["A", "G"], req.query.fileName + "", (err: any) => {
+    if (err === null) {
+      res.send("DONE");
+      return;
+    }
+
+    res.status(500).send("ERROR");
+  });
 });
 
 app.get("/concat", async (req: Request, res: Response) => {
