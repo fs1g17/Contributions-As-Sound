@@ -2,7 +2,7 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import { getUsersContributions } from "./github";
 import convertContributionsToNotes from "./notes";
-import { mergeNotes } from "./ffmpeg";
+import { concatFiles, mergeNotes } from "./ffmpeg";
 
 dotenv.config();
 
@@ -39,12 +39,25 @@ app.get("/notes", async (req: Request, res: Response) => {
 
 app.get("/combine", async (req: Request, res: Response) => {
   try {
-    mergeNotes(["A", "C"], () => res.send("DONE"));
-  } catch(error) {
+    mergeNotes(["A", "G", "C", "B"], req.query.fileName + "", () =>
+      res.send("DONE")
+    );
+  } catch (error) {
     console.log(error);
     res.status(500).send(error);
   }
-})
+});
+
+app.get("/concat", async (req: Request, res: Response) => {
+  concatFiles(["week1", "week2"], function (err: any) {
+    if (err === null) {
+      res.send("DONE");
+      return;
+    }
+
+    res.status(500).send("ERROR");
+  });
+});
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);

@@ -1,7 +1,9 @@
 import ffmpeg from "fluent-ffmpeg";
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+const ffprobePath = require("@ffprobe-installer/ffprobe").path;
 import { Note } from "../types/notes";
 ffmpeg.setFfmpegPath(ffmpegPath);
+ffmpeg.setFfprobePath(ffprobePath);
 import path from "path";
 
 const noteToPathMap: { [key: string]: string } = {
@@ -12,18 +14,42 @@ const noteToPathMap: { [key: string]: string } = {
   E: path.resolve(__dirname, "./notes/E_note.wav"),
   F: path.resolve(__dirname, "./notes/F_note.wav"),
   G: path.resolve(__dirname, "./notes/G_note.wav"),
+};
+
+export function mergeNotes(
+  notes: Note[],
+  fileName: string,
+  callback: Function
+) {
+  const f = ffmpeg();
+  notes.forEach((note) => f.input(noteToPathMap[note]));
+  f.complexFilter([
+    {
+      filter: "amix",
+      options: { inputs: notes.length, duration: "longest" },
+    },
+  ])
+    .on("end", async function (output) {
+      console.log(output, "files hav been merged and saved.");
+      callback();
+    })
+    .saveToFile(path.resolve(__dirname, `./notes/${fileName}.wav`));
 }
 
-export function mergeNotes(notes: Note[], callback: Function) {
-  ffmpeg()
-  .input(noteToPathMap[notes[0]])
-  .input(noteToPathMap[notes[1]])
-  .complexFilter([{
-    filter: 'amix', options: { inputs: 2, duration: 'longest'}
-  }])
-  .on('end', async function (output) {
-    console.log(output, 'files hav been merged and saved.')
-    callback()
-  })
-  .saveToFile(path.resolve(__dirname, "./notes/poop.wav"))
+export function concatFiles(fileNames: string[], callback: Function) {
+  var f = ffmpeg();
+  fileNames.forEach((fileName) =>
+    f.input(path.resolve(__dirname, `./notes/${fileName}.wav`))
+  );
+  f.mergeToFile(
+    path.resolve(__dirname, "./notes/output.wav"),
+    path.resolve(__dirname, "./temp")
+  )
+    .on("end", function () {
+      callback(null);
+    })
+    .on("error", function (err) {
+      console.log(err);
+      callback(err);
+    });
 }
