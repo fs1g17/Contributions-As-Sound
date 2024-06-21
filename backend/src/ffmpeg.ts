@@ -1,7 +1,7 @@
 import path from "path";
 import ffmpeg from "fluent-ffmpeg";
-import ffmpegPath  from "@ffmpeg-installer/ffmpeg"
-import ffprobePath from "@ffprobe-installer/ffprobe"
+import ffmpegPath from "@ffmpeg-installer/ffmpeg";
+import ffprobePath from "@ffprobe-installer/ffprobe";
 
 import { Note } from "../types/notes";
 
